@@ -10,7 +10,7 @@ def parse(data):
     )
     if server_info.path:
       server_info = server_info._replace(netloc=server_info.netloc + server_info.path, path="")
-    ports_match = re.search(r',(\d+-\d+)', server_info.netloc)
+    ports_match = re.search(r',(\d+-\d+)', server_info.netloc) or re.search(r':(\d+-\d+)', server_info.netloc)
     node = {
         'tag': unquote(server_info.fragment) or tool.genName()+'_hysteria2',
         'type': 'hysteria2',
@@ -29,7 +29,7 @@ def parse(data):
         node['down_mbps'] = int(re.search(r'\d+', netquery['downmbps']).group())
     if ports_match:
         node['server_ports'] = [ports_match.group(1).replace('-', ':')]
-    elif netquery['mport']:
+    elif netquery.get('mport'):
         node['server_ports'] = [netquery['mport'].replace('-', ':')]
     if netquery.get('insecure') in ['1', 'true'] or netquery.get('allowInsecure') == '1':
         node['tls']['insecure'] = True
